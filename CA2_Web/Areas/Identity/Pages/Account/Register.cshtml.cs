@@ -86,9 +86,9 @@ namespace CA2_Web.Areas.Identity.Pages.Account
                     var result = await _userManager.CreateAsync(user, Input.Password);
                     if (result.Succeeded)
                     {
-                        var newlyCreated = await _userManager.FindByNameAsync(user.UserName);
-                        var userId = user.Id;
-                        _context.Add(new UserProperty { Id = userId, AccessLevel = 1 });
+                        IdentityUser newlyCreated = await _userManager.FindByNameAsync(user.UserName);
+                        string userId = user.Id;
+                        _context.Add(new UserProperty { Id = userId, Email = Input.Email, AccessLevel = 1 });
                         _context.SaveChanges();
 
                         _logger.LogInformation("User created a new account with password.");
@@ -105,8 +105,6 @@ namespace CA2_Web.Areas.Identity.Pages.Account
 
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         return LocalRedirect(returnUrl);
-
-                        //return RedirectToPage("./CheckEmail");
                     }
                     foreach (var error in result.Errors)
                     {

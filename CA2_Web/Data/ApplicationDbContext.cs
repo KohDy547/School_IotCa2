@@ -12,5 +12,8 @@ namespace CA2_Web.Data
         }
 
         public DbSet<UserProperty> UserProperties { get; set; }
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
     }
 }

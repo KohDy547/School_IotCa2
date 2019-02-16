@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/fonts/Roboto/Roboto.css" />
     <script type="text/javascript" src="~/js/JQuery_v3.3.1.js"></script>
-    <script type="text/javascript" src="~/lib/bootstrap_v4.1.3/vendor/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
 
     <title>@ViewData["Title"]</title>
 </head>
@@ -29,10 +29,7 @@
                     <partial name="_LoginPartial" />
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Location/Index">Location</a>
                         </li>
                     </ul>
                 </div>
@@ -46,9 +43,11 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted" id="footer" style="display:none;">
         <div class="container">
-            &copy; @AppConfigurations.Value.AppFooter | <a asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; @AppConfigurations.Value.AppFooter |
+            <a asp-area="" asp-page="/Privacy">Privacy</a> |
+            <a asp-area="" asp-page="/About">About</a>
         </div>
     </footer>
     <script src="~/js/site.js" asp-append-version="true"></script>

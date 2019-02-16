@@ -33,7 +33,6 @@ namespace CA2_Web
             #region ConfigureServices - Configure Identity Server
             services.AddDefaultIdentity<IdentityUser>(config =>
             {
-                //config.SignIn.RequireConfirmedEmail = true;
             })
                 .AddDefaultUI(UIFramework.Bootstrap4)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -50,7 +49,9 @@ namespace CA2_Web
             services.AddMvc()
                 .AddRazorPagesOptions(options =>
                 {
-
+                    options.Conventions.AuthorizeFolder("/Room");
+                    options.Conventions.AuthorizeFolder("/Location");
+                    options.Conventions.AllowAnonymousToPage("/Location/Index");
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             #endregion
@@ -101,6 +102,12 @@ namespace CA2_Web
                 options.AddPolicy(
                     "AccessLevel03",
                     policy => policy.Requirements.Add(new AccessLevelRequirement(3)));
+                options.AddPolicy(
+                    "AccessLevel04",
+                    policy => policy.Requirements.Add(new AccessLevelRequirement(4)));
+                options.AddPolicy(
+                    "AccessLevel05",
+                    policy => policy.Requirements.Add(new AccessLevelRequirement(5)));
             });
             #endregion
 

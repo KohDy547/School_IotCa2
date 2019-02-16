@@ -4,14 +4,16 @@ using CA2_Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CA2_Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190216072950_ExternalTables_0.1")]
+    partial class ExternalTables_01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,8 +89,6 @@ namespace CA2_Web.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("AccessLevel");
-
-                    b.Property<string>("Email");
 
                     b.Property<string>("RfId");
 

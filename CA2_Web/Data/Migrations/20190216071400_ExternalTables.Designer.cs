@@ -4,14 +4,16 @@ using CA2_Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CA2_Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190216071400_ExternalTables")]
+    partial class ExternalTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,13 +70,13 @@ namespace CA2_Web.Data.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("Description");
+
                     b.Property<string>("DeviceId");
 
                     b.Property<string>("LocationId");
 
                     b.Property<string>("LocationName");
-
-                    b.Property<string>("Name");
 
                     b.HasKey("Id");
 
@@ -87,8 +89,6 @@ namespace CA2_Web.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("AccessLevel");
-
-                    b.Property<string>("Email");
 
                     b.Property<string>("RfId");
 

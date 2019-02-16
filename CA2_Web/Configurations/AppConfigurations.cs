@@ -4,6 +4,7 @@
     {
         public string AppName { get; set; }
         public string AppFooter { get; set; }
+        public string AppDateTimeFormat { get; set; }
     }
 
     public class SendGridConfigurations
@@ -22,6 +23,7 @@
     {
         public string GenerationSeed { get; set; }
     }
+
     public class AwsConfigurations
     {
         public string CredentialsPath { get; set; }
@@ -29,9 +31,10 @@
     public class AwsS3Configurations
     {
         public string CredentialsProfile { get; set; }
-
         public string BucketRegion { get; set; }
         public string BucketName { get; set; }
+
+        public string Locations_ImgBaseUrl { get; set; }
     }
     public class AwsDynamoConfigurations
     {

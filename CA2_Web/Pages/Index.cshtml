@@ -4,7 +4,35 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid row">
+    <div class="col-md-6">
+        <h2 class="mt-0">Welcome</h2>
+    </div>
+    <div class="col-md-6 text-right">
+
+    </div>
+</div>
+<div id="pageLoader" class="container d-flex justify-content-center">
+    <img src="~/images/Loader.gif" />
+</div>
+
+<div id="pageContent" class="container" style="display:none;">
+    @if (Model.ShowMessage)
+    {
+        <div class="alert @Model.Message.Split('|')[0] alert-dismissible fade show" role="alert">
+            @Model.Message.Split('|')[1]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        Model.Message = "";
+    }
+
+    <script>
+        $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
+            $(this).remove();
+            $("#pageContent").fadeIn(@Model.ContentFade);
+            $("#footer").fadeIn(@Model.ContentFade);
+        });
+    </script>
 </div>

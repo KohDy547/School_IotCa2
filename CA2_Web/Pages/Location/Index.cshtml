@@ -1,0 +1,82 @@
+﻿@page
+@using CA2_Web.Models
+@model CA2_Web.Pages.Location.IndexModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    .locationImg{
+        width:200px;
+    }
+</style>
+
+<div class="container-fluid row">
+    <div class="col-md-6">
+        <h2 class="mt-0">Locations</h2>
+    </div>
+    <div class="col-md-6 text-right">
+        @if (Model.IsAdmin)
+        {
+            <a class="btn btn-outline-info" asp-page="/Location/Add">Add Location</a>
+        }
+    </div>
+</div>
+<hr />
+<div id="pageLoader" class="container d-flex justify-content-center">
+    <img src="~/images/Loader.gif" />
+</div>
+<div id="pageContent" class="container" style="display:none; min-width:560px;">
+    <form id="searchLocation" class="container" method="post">
+        <div class="row">
+            <div class="input-group">
+                @if (Model.Searching)
+                {
+                    <input id="txt_searchLocation" name="txt_searchLocation" type="text" class="form-control" placeholder="Search..." value="@Model.SearchedQuery">
+                }
+                else
+                {
+                    <input id="txt_searchLocation" name="txt_searchLocation" type="text" class="form-control" placeholder="Search...">
+                }
+                <div class="input-group-append">
+                    <a class="btn btn-outline-secondary" asp-page="/Csc/Index">Clear</a>
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <br />
+    @if (Model.ShowMessage)
+    {
+        <div class="alert @Model.Message.Split('|')[0] alert-dismissible fade show" role="alert">
+            @Model.Message.Split('|')[1]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        Model.Message = "";
+    }
+
+    @foreach (Location location in Model.Locations)
+    {
+        string locationDesc = (string.IsNullOrEmpty(location.Description)) ? "&nbsp;" : location.Description;
+        string locationImgUrl = Model.ImgBaseUrl + location.Image + ".jpg";
+        <div class="card flex-row flex-wrap" style="margin:10px 0px 10px 0px;">
+            <div class="card-header border-0">
+                <img class="locationImg" src="@locationImgUrl">
+            </div>
+            <div class="card-block px-2" style="padding: 10px;">
+                <h4 class="card-title">@location.Name</h4>
+                <p class="card-text text-muted">@Html.Raw(locationDesc)</p>
+                <a href="Location/Details/@location.Id" class="btn btn-outline-info">View Details</a>
+            </div>
+        </div>
+    }
+
+    <script>
+        $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
+            $(this).remove();
+            $("#pageContent").fadeIn(@Model.ContentFade);
+        });
+    </script>
+</div>

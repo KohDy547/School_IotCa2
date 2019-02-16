@@ -1,0 +1,67 @@
+﻿@page "{targetId}"
+@using CA2_Web.Models
+@model CA2_Web.Pages.Room.IndexModel
+@{
+    ViewData["Title"] = Model.Room.Name;
+}
+
+<div class="container-fluid row">
+    <div class="col-md-6">
+        <h2 class="mt-0">@Model.Room.Name</h2>
+    </div>
+    <div class="col-md-6 text-right">
+        u8
+    </div>
+</div>
+<hr />
+<div id="pageLoader" class="container d-flex justify-content-center">
+    <img src="~/images/Loader.gif" />
+</div>
+<div id="pageContent" class="container" style="display:none; min-width:560px;">
+    @if (Model.ShowMessage)
+    {
+        <div class="alert @Model.Message.Split('|')[0] alert-dismissible fade show" role="alert">
+            @Model.Message.Split('|')[1]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        Model.Message = "";
+    }
+
+    @foreach (Booking booking in Model.Bookings)
+    {
+        <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@booking.Id">
+            <div class="card-body">
+                <h5 class="card-title float-left">@booking.BookedByName</h5>
+                <div class="card-text">
+                    @if (Model.IsAdmin)
+                    {
+                        <form method="post">
+                            <input type="text" style="display:none;" value="deleteBooking" name="postType" />
+                            <input type="text" style="display:none;" value="@booking.Id" name="targetBookingId" />
+                            <button style="margin:0px 10px 0px 10px;" class="btn btn-outline-danger float-right">
+                                Delete Room
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @foreach (Booking booking in Model.Bookings)
+    {
+        <script>
+                $("#@booking.Id").fadeIn(@Model.ContentFade);
+        </script>
+        Model.ContentFade += 10;
+    }
+
+    <script>
+    $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
+        $(this).remove();
+        $("#pageContent").fadeIn(@Model.ContentFade);
+    });
+    </script>
+</div>
