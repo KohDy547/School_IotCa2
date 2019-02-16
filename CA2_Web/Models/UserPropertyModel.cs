@@ -4,5 +4,6 @@
     {
         public string Id { get; set; }
         public int AccessLevel { get; set; }
+        public string RfId { get; set; }
     }
 }

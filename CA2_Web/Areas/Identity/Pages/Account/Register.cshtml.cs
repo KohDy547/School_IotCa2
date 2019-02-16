@@ -24,16 +24,18 @@ namespace CA2_Web.Areas.Identity.Pages.Account
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-        private readonly ICaptchaService _captcha;
+        private readonly ICaptchaService _captchaService;
 
         public RegisterModel(
-            ApplicationDbContext ApplicationDbContext,
+            ApplicationDbContext context,
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
             ICaptchaService captchaService)
         {
+            _context = context;
+            _captchaService = captchaService;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
@@ -77,7 +79,7 @@ namespace CA2_Web.Areas.Identity.Pages.Account
             returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
-                bool NotBot = _captcha.ValidateCaptchaCode(Input.CaptchaCode, HttpContext);
+                bool NotBot = _captchaService.ValidateCaptchaCode(Input.CaptchaCode, HttpContext);
                 if (NotBot)
                 {
                     var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
@@ -119,8 +121,8 @@ namespace CA2_Web.Areas.Identity.Pages.Account
         {
             int width = 100;
             int height = 30;
-            string captchaCode = _captcha.GenerateCaptchaCode();
-            CaptchaResponse result = _captcha.GenerateCaptchaImage(width, height, captchaCode);
+            string captchaCode = _captchaService.GenerateCaptchaCode();
+            CaptchaResponse result = _captchaService.GenerateCaptchaImage(width, height, captchaCode);
             HttpContext.Session.SetString("CaptchaCode", result.CaptchaCode);
             return result.CaptchBase64Data;
         }
