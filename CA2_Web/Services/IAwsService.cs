@@ -20,6 +20,8 @@ namespace CA2_Assignment.Services
             AmazonS3Client inputS3Client, string inputS3Bucket, string inputS3FileKey, Stream inputFileStream, bool makeFilePublic = false);
         Task<Response> awsS3_DeleteFileAsync(
             AmazonS3Client inputS3Client, string inputS3Bucket, string inputS3FileKey);
+
+
     }
 
     public class AwsService : IAwsService

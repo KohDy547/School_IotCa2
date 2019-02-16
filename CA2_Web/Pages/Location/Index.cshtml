@@ -39,7 +39,7 @@
                     <input id="txt_searchLocation" name="txt_searchLocation" type="text" class="form-control" placeholder="Search...">
                 }
                 <div class="input-group-append">
-                    <a class="btn btn-outline-secondary" asp-page="/Csc/Index">Clear</a>
+                    <a class="btn btn-outline-secondary" asp-page="/Location/Add">Clear</a>
                     <button class="btn btn-outline-secondary" type="submit">Search</button>
                 </div>
             </div>
@@ -60,7 +60,7 @@
     @foreach (Location location in Model.Locations)
     {
         string locationDesc = (string.IsNullOrEmpty(location.Description)) ? "&nbsp;" : location.Description;
-        string locationImgUrl = Model.ImgBaseUrl + location.Image + ".jpg";
+        string locationImgUrl = Model.ImgBaseUrl + location.Id + ".jpg";
         <div class="card flex-row flex-wrap" style="margin:10px 0px 10px 0px;">
             <div class="card-header border-0">
                 <img class="locationImg" src="@locationImgUrl">
@@ -68,7 +68,7 @@
             <div class="card-block px-2" style="padding: 10px;">
                 <h4 class="card-title">@location.Name</h4>
                 <p class="card-text text-muted">@Html.Raw(locationDesc)</p>
-                <a href="Location/Details/@location.Id" class="btn btn-outline-info">View Details</a>
+                <a href="/Location/Details/@location.Id" class="btn btn-outline-info">View Details</a>
             </div>
         </div>
     }

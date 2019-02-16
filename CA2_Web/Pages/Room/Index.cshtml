@@ -10,10 +10,26 @@
         <h2 class="mt-0">@Model.Room.Name</h2>
     </div>
     <div class="col-md-6 text-right">
-        u8
+        <a class="btn btn-outline-info" href="/Room/Book/@Model.Room.Id">Book Timing</a>
+        @if (Model.IsAdmin)
+        {
+            <button type="button" class="btn btn-outline-danger" onclick="btn_Delete_OnClick();">Delete</button>
+        }
     </div>
 </div>
 <hr />
+@if (Model.IsAdmin)
+{
+    <div id="confirmDelete" style="display:none;" class="alert alert-danger alert-dismissible" role="alert">
+        <form method="post">
+            <input type="text" style="display:none;" value="deleteRoom" name="postType" />
+            <input type="text" style="display:none;" value="@Model.Room.Id" name="targetRoomId" />
+            <button type="submit" class="btn btn-sm btn-outline-danger" style="margin:0px 3px 0px 3px;">I said delete!</button>
+            <button type="button" onclick="btn_HangOn_OnClick();" class="btn btn-sm btn-outline-secondary" style="margin:0px 3px 0px 3px;">Hang on...</button>
+            <strong>Delete this location?</strong> Are you sure??
+        </form>
+    </div>
+}
 <div id="pageLoader" class="container d-flex justify-content-center">
     <img src="~/images/Loader.gif" />
 </div>
@@ -33,15 +49,18 @@
     {
         <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@booking.Id">
             <div class="card-body">
-                <h5 class="card-title float-left">@booking.BookedByName</h5>
+                <h5 class="card-title">@booking.BookedByName</h5>
                 <div class="card-text">
+                    Status: @booking.Status<br />
+                    Time Slot: @booking.TimeSlot<br />
+                    Supervised By: @booking.SupervisedByName<br />
                     @if (Model.IsAdmin)
                     {
                         <form method="post">
                             <input type="text" style="display:none;" value="deleteBooking" name="postType" />
                             <input type="text" style="display:none;" value="@booking.Id" name="targetBookingId" />
                             <button style="margin:0px 10px 0px 10px;" class="btn btn-outline-danger float-right">
-                                Delete Room
+                                Delete Booking
                             </button>
                         </form>
                     }
@@ -63,5 +82,12 @@
         $(this).remove();
         $("#pageContent").fadeIn(@Model.ContentFade);
     });
+
+    function btn_Delete_OnClick() {
+        $("#confirmDelete").fadeIn(@Model.ContentFade);
+    }
+    function btn_HangOn_OnClick() {
+        $("#confirmDelete").fadeOut(@Model.ContentFade);
+    }
     </script>
 </div>

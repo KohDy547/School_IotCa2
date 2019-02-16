@@ -1,5 +1,11 @@
-﻿using CA2_Web.Configurations;
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
+using CA2_Assignment.Models;
+using CA2_Assignment.Services;
+using CA2_Web.Configurations;
 using CA2_Web.Data;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -23,19 +29,36 @@ namespace CA2_Web.Pages.Location
         public Models.Location Location = new Models.Location();
         public Models.Room[] Rooms = new Models.Room[0];
 
-        private readonly ApplicationDbContext _ApplicationDbContext;
-        private readonly AwsS3Configurations _AwsS3Configurations;
+        private readonly IHostingEnvironment _IHostingEnvironment;
         private readonly IHttpContextAccessor _IHttpContextAccessor;
+        private readonly ApplicationDbContext _ApplicationDbContext;
+        private readonly AwsConfigurations _AwsConfigurations;
+        private readonly AwsS3Configurations _AwsS3Configurations;
+        private readonly IAwsService _IAwsService;
+        private readonly AmazonS3Client _AmazonS3Client;
         public DetailsModel(
+            IHostingEnvironment IHostingEnvironment,
+            IHttpContextAccessor IHttpContextAccessor,
             ApplicationDbContext ApplicationDbContext,
+            IOptions<AwsConfigurations> AwsConfigurations,
             IOptions<AwsS3Configurations> AwsS3Configurations,
-            IHttpContextAccessor IHttpContextAccessor)
+            IAwsService IAwsService)
         {
-            _ApplicationDbContext = ApplicationDbContext;
-            _AwsS3Configurations = AwsS3Configurations.Value;
+            _IHostingEnvironment = IHostingEnvironment;
             _IHttpContextAccessor = IHttpContextAccessor;
+            _ApplicationDbContext = ApplicationDbContext;
+            _AwsConfigurations = AwsConfigurations.Value;
+            _AwsS3Configurations = AwsS3Configurations.Value;
+            _IAwsService = IAwsService;
 
             ImgBaseUrl = _AwsS3Configurations.Locations_ImgBaseUrl;
+
+            string awsCredentialsPath = _IHostingEnvironment.ContentRootPath + _AwsConfigurations.CredentialsPath;
+            _AmazonS3Client = new AmazonS3Client(
+                new StoredProfileAWSCredentials(
+                    _AwsS3Configurations.CredentialsProfile,
+                    awsCredentialsPath),
+                RegionEndpoint.GetBySystemName(_AwsS3Configurations.BucketRegion));
         }
 
         public void OnGet(string targetId)
@@ -70,50 +93,37 @@ namespace CA2_Web.Pages.Location
         }
         public IActionResult OnPost()
         {
-            string postType = Request.Form["postType"];
-            if (postType == "deleteLocation")
+            try
             {
-                try
-                {
-                    string targetLocationId = Request.Form["targetLocationId"];
-                    Models.Location location = _ApplicationDbContext.Locations.Where(x => x.Id == targetLocationId).First();
-                    Models.Room[] rooms = _ApplicationDbContext.Rooms.Where(x => x.LocationId == targetLocationId).ToArray();
-                    foreach (Models.Room room in rooms)
-                    {
-                        _ApplicationDbContext.Rooms.Remove(room);
-                    }
+                string targetLocationId = Request.Form["targetLocationId"];
 
-                    _ApplicationDbContext.Locations.Remove(location);
-                    _ApplicationDbContext.SaveChangesAsync();
-
-                    Message = "alert alert-success|Location successfully deleted.";
-                    return RedirectToPage("Index");
-                }
-                catch
+                Response returnedResponse = _IAwsService.awsS3_DeleteFileAsync(
+                    _AmazonS3Client,
+                    _AwsS3Configurations.BucketName,
+                    "Ca2Iot/" + targetLocationId + ".jpg").Result;
+                if (returnedResponse.HasError)
                 {
                     Message = "alert alert-danger|Failed to delete location.";
                     return RedirectToPage("Details/" + Location.Id);
                 }
-            }
-            else
-            {
 
-                try
+                Models.Location location = _ApplicationDbContext.Locations.Where(x => x.Id == targetLocationId).First();
+                Models.Room[] rooms = _ApplicationDbContext.Rooms.Where(x => x.LocationId == targetLocationId).ToArray();
+                foreach (Models.Room room in rooms)
                 {
-                    string targetRoomId = Request.Form["targetRoomId"];
-                    Models.Room room = _ApplicationDbContext.Rooms.Where(x => x.Id == targetRoomId).First();
-
                     _ApplicationDbContext.Rooms.Remove(room);
-                    _ApplicationDbContext.SaveChangesAsync();
+                }
 
-                    Message = "alert alert-success|Room successfully deleted.";
-                    return RedirectToPage("Details/" + Location.Id);
-                }
-                catch (Exception e)
-                {
-                    Message = "alert alert-danger|Failed to delete room.";
-                    return RedirectToPage("Details/" + Location.Id);
-                }
+                _ApplicationDbContext.Locations.Remove(location);
+                _ApplicationDbContext.SaveChangesAsync();
+
+                Message = "alert alert-success|Location successfully deleted.";
+                return RedirectToPage("Index");
+            }
+            catch
+            {
+                Message = "alert alert-danger|Failed to delete location.";
+                return RedirectToPage("Details/" + Location.Id);
             }
         }
     }

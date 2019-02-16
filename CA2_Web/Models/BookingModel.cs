@@ -10,10 +10,9 @@
         public string SupervisedById { get; set; }
         public string SupervisedByName { get; set; }
 
+        public int Status { get; set; }
         public string BookDate { get; set; }
-        public int StartHour { get; set; }
-        public int EndHour { get; set; }
-
-        public bool Expired { get; set; }
+        public int TimeSlotId { get; set; }
+        public string TimeSlot { get; set; }
     }
 }

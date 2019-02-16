@@ -66,12 +66,54 @@ namespace CA2_Web.Pages.Room
                     .Where(x => x.RoomId == Room.Id)
                     .OrderByDescending(x => DateTime.ParseExact(
                         x.BookDate, _AppConfigurations.AppDateTimeFormat, CultureInfo.InvariantCulture))
-                    .ThenByDescending(x => x.StartHour)
+                    .ThenBy(x => x.TimeSlotId)
                     .ToArray();
             }
-            catch
+            catch(Exception e)
             {
                 Message = "alert alert-danger|Failed to load location's details.";
+            }
+        }
+        public IActionResult OnPost()
+        {
+            string postType = Request.Form["postType"];
+            if(postType == "deleteRoom")
+            {
+                try
+                {
+                    string targetRoomId = Request.Form["targetRoomId"];
+                    Models.Room room = _ApplicationDbContext.Rooms.Where(x => x.Id == targetRoomId).First();
+
+                    _ApplicationDbContext.Rooms.Remove(room);
+                    _ApplicationDbContext.SaveChangesAsync();
+
+                    Message = "alert alert-success|Room successfully deleted.";
+                    return Redirect("/Location/Index");
+                }
+                catch
+                {
+                    Message = "alert alert-danger|Failed to delete room.";
+                    return RedirectToPage("Index/" + Room.Id);
+                }
+            }
+            else
+            {
+                try
+                {
+                    string targetBookingId = Request.Form["targetBookingId"];
+                    Models.Booking booking = _ApplicationDbContext.Bookings.Where(x => x.Id == targetBookingId).First();
+
+                    _ApplicationDbContext.Bookings.Remove(booking);
+                    _ApplicationDbContext.SaveChangesAsync();
+
+                    Message = "alert alert-success|Booking successfully deleted.";
+                    return Redirect("/Location/Index");
+                }
+                catch
+                {
+                    Message = "alert alert-danger|Failed to delete booking.";
+                    return RedirectToPage("Index/" + Room.Id);
+                }
             }
         }
     }

@@ -1,0 +1,82 @@
+﻿@page "{targetId}"
+@model CA2_Web.Pages.Room.BookModel
+@{
+    ViewData["Title"] = "Book";
+}
+
+<h3>Book Timing</h3><hr />
+
+<div id="pageLoader" class="container d-flex justify-content-center">
+    <img src="~/images/Loader.gif" />
+</div>
+
+<div id="pageContent" class="container" style="display:none;">
+    @if (Model.ShowMessage)
+    {
+        <div class="alert @Model.Message.Split('|')[0] alert-dismissible fade show" role="alert">
+            @Model.Message.Split('|')[1]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        Model.Message = "";
+    }
+
+    <form id="uploadTalent" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <input name="txt_isStudent" style="display:none" type="text" value="@Model.IsStudent" />
+            <input name="txt_userName" style="display:none" type="text" value="@Model.UserName" />
+            <input name="txt_roomId" style="display:none" type="text" value="@Model.RoomId" />
+
+            <label for="txt_roomName">Room</label>
+            <input name="txt_roomName" id="txt_roomName" disabled type="text" class="form-control"
+                   placeholder="Room Name" value="@Model.RoomName" />
+            <br />
+
+            <label for="dt_date">Date</label>
+            <input name="dt_date" id="dt_date" type="date" class="form-control" />
+            <br />
+
+            @if (Model.IsStudent == 1)
+            {
+                <label for="cmb_Authority">Supervised By</label>
+                <select class="form-control" name="cmb_Authority" id="cmb_Authority">
+                    @foreach (string[] authority in Model.Authorities)
+                    {
+                        <option value="@authority[0]">@authority[1]</option>
+                    }
+                </select>
+                <br />
+            }
+
+            <label for="cmb_timeSlot">Time Slot</label>
+            <select class="form-control" name="cmb_timeSlot" id="cmb_timeSlot">
+                @for (int i = 0; i < Model.TimeSlots.Length; i++)
+                {
+                    <option value="@i">@Model.TimeSlots[i]</option>
+                }
+            </select>
+        </div>
+
+        <a href="/CSC/Talents/Index" class="btn btn-outline-danger btn-default">Cancel</a>
+        <button id="btn_submit" class="noClick btn btn-outline-info">Upload</button>
+    </form>
+</div>
+<script>
+    $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
+        $(this).remove();
+        $("#pageContent").fadeIn(@Model.ContentFade);
+    });
+
+    function file_talentImg_onInput(event) {
+        var filePath = $("#file_talentImg").val();
+        if (filePath) {
+            var startIndex = (filePath.indexOf('\\') >= 0 ? filePath.lastIndexOf('\\') : filePath.lastIndexOf('/'));
+            var fileName = filePath.substring(startIndex);
+            if (fileName.indexOf('\\') === 0 || fileName.indexOf('/') === 0) {
+                fileName = fileName.substring(1);
+            }
+            $("#file_talentImgDesc").html(fileName);
+        }
+    }
+</script>

@@ -3,7 +3,7 @@
 @model CA2_Web.Pages.Location.DetailsModel
 @{
     ViewData["Title"] = Model.Location.Name;
-    string locationImgUrl = Model.ImgBaseUrl + Model.Location.Image + ".jpg";
+    string locationImgUrl = Model.ImgBaseUrl + Model.Location.Id + ".jpg";
 }
 
 <div class="container-fluid row">
@@ -13,15 +13,22 @@
     <div class="col-md-6 text-right">
         @if (Model.IsAdmin)
         {
-        <form method="post">
-            <input type="text" style="display:none;" value="deleteLocation" name="postType" />
-            <input type="text" style="display:none;" value="@Model.Location.Id" name="targetLocationId" />
-            <button type="submit" class="btn btn-outline-danger">Delete</button>
-        </form>
+            <button type="button" class="btn btn-outline-danger" onclick="btn_Delete_OnClick();">Delete</button>
         }
     </div>
 </div>
 <hr />
+@if (Model.IsAdmin)
+{
+    <div id="confirmDelete" style="display:none;" class="alert alert-danger alert-dismissible" role="alert">
+        <form method="post">
+            <input type="text" style="display:none;" value="@Model.Location.Id" name="targetLocationId" />
+            <button type="submit" class="btn btn-sm btn-outline-danger" style="margin:0px 3px 0px 3px;">I said delete!</button>
+            <button type="button" onclick="btn_HangOn_OnClick();" class="btn btn-sm btn-outline-secondary" style="margin:0px 3px 0px 3px;">Hang on...</button>
+            <strong>Delete this location?</strong> Are you sure??
+        </form>
+    </div>
+}
 <div id="pageLoader" class="container d-flex justify-content-center">
     <img src="~/images/Loader.gif" />
 </div>
@@ -49,19 +56,9 @@
                 <div class="card-body">
                     <h5 class="card-title float-left">@room.Name</h5>
                     <div class="card-text">
-                        <a style="margin:0px 10px 0px 10px;" href="Room/Index/@room.Id" class="btn btn-outline-info float-right">
+                        <a style="margin:0px 10px 0px 10px;" href="../../Room/Index/@room.Id" class="btn btn-outline-info float-right">
                             View Room Details
                         </a>
-                        @if (Model.IsAdmin)
-                        {
-                            <form method="post">
-                                <input type="text" style="display:none;" value="deleteRoom" name="postType" />
-                                <input type="text" style="display:none;" value="@room.Id" name="targetRoomId" />
-                                <button style="margin:0px 10px 0px 10px;" class="btn btn-outline-danger float-right">
-                                    Delete Room
-                                </button>
-                            </form>
-                        }
                     </div>
                 </div>
             </div>
@@ -81,5 +78,12 @@
         $(this).remove();
         $("#pageContent").fadeIn(@Model.ContentFade);
     });
+
+    function btn_Delete_OnClick() {
+        $("#confirmDelete").fadeIn(@Model.ContentFade);
+    }
+    function btn_HangOn_OnClick() {
+        $("#confirmDelete").fadeOut(@Model.ContentFade);
+    }
     </script>
 </div>

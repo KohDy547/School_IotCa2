@@ -71,7 +71,7 @@ namespace CA2_Web.Pages.Location
                         else Message = "alert alert-success|'" + query + "' returned " + Locations.Length + " result" +
                             ((Locations.Length > 1) ? "s." : ".");
                     }
-                    catch (Exception)
+                    catch
                     {
                         Message = "alert alert-danger|Search failed.";
                     }

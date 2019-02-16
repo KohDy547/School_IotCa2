@@ -4,14 +4,16 @@ using CA2_Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CA2_Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190216174545_ExternalTables_0.3")]
+    partial class ExternalTables_03
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,17 +32,17 @@ namespace CA2_Web.Data.Migrations
 
                     b.Property<string>("BookedByName");
 
+                    b.Property<int>("EndHour");
+
+                    b.Property<bool>("Expired");
+
                     b.Property<string>("RoomId");
 
-                    b.Property<int>("Status");
+                    b.Property<int>("StartHour");
 
                     b.Property<string>("SupervisedById");
 
                     b.Property<string>("SupervisedByName");
-
-                    b.Property<string>("TimeSlot");
-
-                    b.Property<int>("TimeSlotId");
 
                     b.HasKey("Id");
 
