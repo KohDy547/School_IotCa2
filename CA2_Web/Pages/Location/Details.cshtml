@@ -22,6 +22,7 @@
 {
     <div id="confirmDelete" style="display:none;" class="alert alert-danger alert-dismissible" role="alert">
         <form method="post">
+            <input type="text" style="display:none;" value="deleteLocation" name="postType" />
             <input type="text" style="display:none;" value="@Model.Location.Id" name="targetLocationId" />
             <button type="submit" class="btn btn-sm btn-outline-danger" style="margin:0px 3px 0px 3px;">I said delete!</button>
             <button type="button" onclick="btn_HangOn_OnClick();" class="btn btn-sm btn-outline-secondary" style="margin:0px 3px 0px 3px;">Hang on...</button>
@@ -56,6 +57,15 @@
                 <div class="card-body">
                     <h5 class="card-title float-left">@room.Name</h5>
                     <div class="card-text">
+                        @if (Model.IsAdmin)
+                        {
+                            <form method="post">
+                                <input type="text" style="display:none;" name="txt_deviceId" value="@room.DeviceId" />
+                                <input type="text" style="display:none;" name="txt_roomId" value="@room.Id" />
+                                <input type="text" style="display:none;" value="triggerLockdown" name="postType" />
+                                <button type="submit" class="btn btn-outline-danger float-right">Lockdown</button>
+                            </form>
+                        }
                         <a style="margin:0px 10px 0px 10px;" href="../../Room/Index/@room.Id" class="btn btn-outline-info float-right">
                             View Room Details
                         </a>

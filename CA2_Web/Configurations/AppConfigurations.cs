@@ -38,6 +38,7 @@
     }
     public class AwsDynamoConfigurations
     {
-
+        public string CredentialsProfile { get; set; }
+        public string Region { get; set; }
     }
 }

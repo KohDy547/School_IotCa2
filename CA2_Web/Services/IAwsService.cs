@@ -1,4 +1,7 @@
-﻿using Amazon.S3;
+﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
+using Amazon.S3;
 using Amazon.S3.Model;
 using CA2_Assignment.Models;
 using System;
@@ -21,7 +24,10 @@ namespace CA2_Assignment.Services
         Task<Response> awsS3_DeleteFileAsync(
             AmazonS3Client inputS3Client, string inputS3Bucket, string inputS3FileKey);
 
-
+        Task<Response> awsDDB_GetObjectAsync(
+            AmazonDynamoDBClient inputDDBClient, QueryRequest inputQueryRequest);
+        Task<Response> awsDDB_PutObjectAsync(
+            AmazonDynamoDBClient inputDDBClient, Document inputDocument, string inputTableName);
     }
 
     public class AwsService : IAwsService
@@ -215,6 +221,55 @@ namespace CA2_Assignment.Services
                 {
                     HttpStatus = e.StatusCode,
                     ExceptionPayload = e
+                };
+            }
+            catch (Exception e)
+            {
+                return new Response
+                {
+                    HttpStatus = HttpStatusCode.InternalServerError,
+                    ExceptionPayload = e
+                };
+            }
+        }
+
+        public async Task<Response> awsDDB_GetObjectAsync(
+            AmazonDynamoDBClient inputDDBClient, 
+            QueryRequest inputQueryRequest)
+        {
+            try
+            {
+                QueryResponse response = await inputDDBClient.QueryAsync(inputQueryRequest);
+
+                return new Response
+                {
+                    HttpStatus = HttpStatusCode.OK,
+                    Payload = response
+                };
+            }
+            catch (Exception e)
+            {
+                return new Response
+                {
+                    HttpStatus = HttpStatusCode.InternalServerError,
+                    ExceptionPayload = e
+                };
+            }
+            
+        }
+        public async Task<Response> awsDDB_PutObjectAsync(
+            AmazonDynamoDBClient inputDDBClient,
+            Document inputDocument,
+            string inputTableName)
+        {
+            try
+            {
+                Table table = Table.LoadTable(inputDDBClient, inputTableName);
+                await table.PutItemAsync(inputDocument);
+
+                return new Response
+                {
+                    HttpStatus = HttpStatusCode.OK
                 };
             }
             catch (Exception e)

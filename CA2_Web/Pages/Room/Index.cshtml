@@ -17,6 +17,45 @@
         }
     </div>
 </div>
+@if (Model.IsAdmin)
+{
+    <br />
+    <form class="container" method="post">
+        <label>Device Id</label>
+        <input type="text" style="display:none;" value="updateDeviceId" name="postType" />
+        <input type="text" style="display:none;" value="@Model.Room.Id" name="targetRoomId" />
+        <div class="row">
+            <div class="input-group">
+                @if (!string.IsNullOrEmpty(Model.Room.DeviceId))
+                {
+                    <input id="txt_searchLocation" name="txt_DeviceId" type="text" class="form-control" placeholder="Set up DeviceId"
+                           value="@Model.Room.DeviceId">
+                }
+                else
+                {
+                    <input id="txt_searchLocation" name="txt_DeviceId" type="text" class="form-control" placeholder="Set up DeviceId">
+                }
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Update</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <br />
+    <form class="container" method="post">
+        <label>LCD Message</label>
+        <input type="text" style="display:none;" value="updateDeviceMsg" name="postType" />
+        <input type="text" style="display:none;" value="@Model.Room.DeviceId" name="txt_DeviceId" />
+        <div class="row">
+            <div class="input-group">
+                <input id="txt_postMessage" name="txt_postMessage" type="text" class="form-control" placeholder="Post Message">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Update</button>
+                </div>
+            </div>
+        </div>
+    </form>
+}
 <hr />
 @if (Model.IsAdmin)
 {
@@ -45,6 +84,64 @@
         Model.Message = "";
     }
 
+    @if (!string.IsNullOrEmpty(Model.Room.DeviceId))
+    {
+        <br />
+        <h4>Keycard Audits</h4>
+        @for (int i = 0; i < Model.RfIdAudits.Length; i++)
+        {
+            string[] rfidAudit = Model.RfIdAudits[i];
+            string id = "auditRecord" + i;
+            <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@id">
+                <div class="card-body">
+                    <h5 class="card-title">@rfidAudit[1]</h5>
+                    <div class="card-text">
+                        @rfidAudit[0]<br />
+                        @rfidAudit[2]
+                    </div>
+                </div>
+            </div>
+        }
+        @for (int i = 0; i < Model.RfIdAudits.Length; i++)
+        {
+            string id = "auditRecord" + i;
+            <script>
+                $("#@id").fadeIn(@Model.ContentFade);
+            </script>
+            Model.ContentFade += 10;
+        }
+        <hr />
+
+        <br />
+        <h4>Data Audits</h4>
+        @for (int i = 0; i < Model.DataAudits.Length; i++)
+        {
+            string[] datumAudit = Model.DataAudits[i];
+            string id = "dataRecord" + i;
+            <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@id">
+                <div class="card-body">
+                    <h5 class="card-title">@datumAudit[0]</h5>
+                    <div class="card-text">
+                        Humidity: @datumAudit[1]<br />
+                        Temperature: @datumAudit[3]<br />
+                        Lux Level: @datumAudit[2]
+                    </div>
+                </div>
+            </div>
+        }
+        @for (int i = 0; i < Model.DataAudits.Length; i++)
+        {
+            string id = "dataRecord" + i;
+            <script>
+                $("#@id").fadeIn(@Model.ContentFade);
+            </script>
+            Model.ContentFade += 10;
+        }
+        <hr />
+    }
+    <br />
+    <h4>Bookings</h4>
+    <hr />
     @foreach (Booking booking in Model.Bookings)
     {
         <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@booking.Id">
@@ -68,7 +165,6 @@
             </div>
         </div>
     }
-
     @foreach (Booking booking in Model.Bookings)
     {
         <script>
