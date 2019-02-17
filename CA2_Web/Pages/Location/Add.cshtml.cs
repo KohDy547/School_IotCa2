@@ -5,6 +5,7 @@ using CA2_Assignment.Models;
 using CA2_Assignment.Services;
 using CA2_Web.Configurations;
 using CA2_Web.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ using System.Security.Claims;
 
 namespace CA2_Web.Pages.Location
 {
+    [Authorize(Policy = "AccessLevel02")]
     public class AddModel : PageModel
     {
         [TempData]

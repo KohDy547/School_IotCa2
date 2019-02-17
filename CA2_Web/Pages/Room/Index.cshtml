@@ -91,30 +91,33 @@
         <img src="@surveillanceImg" style="width:100%; object-fit:contain;" />
         <hr />
         <br />
-        <h4>Keycard Audits</h4>
-        @for (int i = 0; i < Model.RfIdAudits.Length; i++)
+        @if (Model.CurrentUserAl > 1)
         {
-            string[] rfidAudit = Model.RfIdAudits[i];
-            string id = "auditRecord" + i;
-            <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@id">
-                <div class="card-body">
-                    <h5 class="card-title">@rfidAudit[1]</h5>
-                    <div class="card-text">
-                        @rfidAudit[0]<br />
-                        @rfidAudit[2]
+            <h4>Keycard Audits</h4>
+            @for (int i = 0; i < Model.RfIdAudits.Length; i++)
+            {
+                string[] rfidAudit = Model.RfIdAudits[i];
+                string id = "auditRecord" + i;
+                <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@id">
+                    <div class="card-body">
+                        <h5 class="card-title">@rfidAudit[1]</h5>
+                        <div class="card-text">
+                            @rfidAudit[0]<br />
+                            @rfidAudit[2]
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-        @for (int i = 0; i < Model.RfIdAudits.Length; i++)
-        {
-            string id = "auditRecord" + i;
-            <script>
+            }
+            @for (int i = 0; i < Model.RfIdAudits.Length; i++)
+            {
+                string id = "auditRecord" + i;
+                <script>
                 $("#@id").fadeIn(@Model.ContentFade);
-            </script>
-            Model.ContentFade += 10;
+                </script>
+                Model.ContentFade += 10;
+            }
+            <hr />
         }
-        <hr />
 
         <br />
         <h4>Data Audits</h4>

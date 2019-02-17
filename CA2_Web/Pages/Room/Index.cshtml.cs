@@ -29,6 +29,7 @@ namespace CA2_Web.Pages.Room
         public int LoaderFade = 800;
         public int ContentFade = 500;
         public bool IsAdmin = false;
+        public int CurrentUserAl = 0;
         public string ImgBaseUrl { get; set; }
         public Models.Room Room = new Models.Room();
         public Models.Booking[] Bookings = new Models.Booking[0];
@@ -87,6 +88,7 @@ namespace CA2_Web.Pages.Room
                         .Select(x => x.AccessLevel)
                         .First();
                     IsAdmin = currentUserAl >= 5;
+                    CurrentUserAl = currentUserAl;
                 }
 
                 Room = _ApplicationDbContext.Rooms
