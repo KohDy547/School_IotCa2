@@ -63,7 +63,7 @@ namespace CA2_Web.Pages.Room
             _IHttpContextAccessor = IHttpContextAccessor;
             _IAwsService = IAwsService;
 
-            ImgBaseUrl = _AwsS3Configurations.Locations_ImgBaseUrl;
+            ImgBaseUrl = _AwsS3Configurations.Surveillance_ImgBaseUrl;
 
             _AmazonDynamoDBClient = new AmazonDynamoDBClient(
                 new StoredProfileAWSCredentials(
@@ -102,6 +102,7 @@ namespace CA2_Web.Pages.Room
 
                 if (!string.IsNullOrEmpty(Room.DeviceId))
                 {
+
                     try
                     {
                         Response response;
@@ -138,12 +139,10 @@ namespace CA2_Web.Pages.Room
                         List<string[]> rfidList = new List<string[]>();
                         foreach(string[] rfid in rfids)
                         {
-                            string username = "";
                             Models.UserProperty user = _ApplicationDbContext.UserProperties
                                 .Where(x => x.RfId.Trim() == rfid[0].Trim().Replace("\r\n", string.Empty))
                                 .FirstOrDefault();
-                            username = user.Email;
-                            if (string.IsNullOrEmpty(username)) username = "Unregistered RfId";
+                            string username = (user == null) ? "Unregistered RfId" : user.Email;
 
                             rfidList.Add(new string[] { rfid[0].Trim().Replace("\r\n", string.Empty), username, rfid[1] });
                         }
@@ -158,7 +157,7 @@ namespace CA2_Web.Pages.Room
                         ).ToArray();
                         DataAudits = data;
                     }
-                    catch
+                    catch(Exception e)
                     {
                         Message = "alert alert-danger|Failed to load room's details.";
                     }

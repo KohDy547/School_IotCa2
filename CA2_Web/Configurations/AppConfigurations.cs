@@ -35,6 +35,7 @@
         public string BucketName { get; set; }
 
         public string Locations_ImgBaseUrl { get; set; }
+        public string Surveillance_ImgBaseUrl { get; set; }
     }
     public class AwsDynamoConfigurations
     {
