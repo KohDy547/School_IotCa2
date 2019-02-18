@@ -1,15 +1,8 @@
 ﻿@page
 @model CA2_Web.Pages.Location.AddModel
 @{
-    ViewData["Title"] = "Add";
+    ViewData["Title"] = "Add Location";
 }
-
-<style>
-    .textArea {
-        resize: none;
-        width: 100%;
-    }
-</style>
 
 <h3>Add Location</h3><hr />
 
@@ -35,14 +28,14 @@
             <input asp-for="Input.Name" id="txt_inputName" type="text" class="form-control" placeholder="Location Name" />
             <br />
 
-            <label asp-for="Input.Description" id="txt_inputBiographyLbl" for="txt_inputName"></label>
+            <label asp-for="Input.Description" id="txt_inputBiographyLbl" for="txt_inputBiography"></label>
             <input asp-for="Input.Description" id="txt_inputBiography" type="text" class="form-control" placeholder="Location Description" />
             <br />
 
             <label id="file_inputImgLbl" for="file_inputImgDesc" value="0">Image</label>
             <div class="input-group">
                 <input asp-for="Input.Photo" type="file" id="file_inputImg" accept="image/*" aria-describedby="file_inputImgDesc"
-                       class="custom-file-input" oninput="file_inputImg_onInput(event)" />
+                        class="custom-file-input" oninput="file_inputImg_onInput(event)" />
                 <label asp-for="Input.Photo" id="file_inputImgDesc" class="custom-file-label" for="file_inputImg">Location Photo</label>
             </div>
             <br />
@@ -52,6 +45,7 @@
         <button id="btn_submit" class="noClick btn btn-outline-info">Upload</button>
     </form>
 </div>
+
 <script>
     $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
         $(this).remove();

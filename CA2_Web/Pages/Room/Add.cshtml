@@ -1,0 +1,54 @@
+﻿@page "{targetId}"
+@model CA2_Web.Pages.Room.AddModel
+@{
+    ViewData["Title"] = "Add Room";
+}
+
+<h3>Add Room</h3><hr />
+
+<div id="pageLoader" class="container d-flex justify-content-center">
+    <img src="~/images/Loader.gif" />
+</div>
+
+<div id="pageContent" class="container" style="display:none; min-width:560px;">
+    @if (Model.ShowMessage)
+    {
+        <div class="alert @Model.Message.Split('|')[0] alert-dismissible fade show" role="alert">
+            @Model.Message.Split('|')[1]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        Model.Message = "";
+    }
+
+    <form method="post">
+        <div class="form-group">
+            <input name="txt_inputLocationId" style="display:none;" type="text" value="@Model.TargetLocationId" />
+            <input name="txt_inputLocationName" style="display:none;" type="text" value="@Model.TargetLocationName" />
+            
+            <label for="txt_inputLocationName">Location Name</label>
+            <input id="txt_inputLocationName" type="text" disabled class="form-control" value="@Model.TargetLocationName" />
+            <br />
+
+            <label asp-for="Input.Name" for="txt_inputName"></label>
+            <input asp-for="Input.Name" id="txt_inputName" type="text" class="form-control" placeholder="Room Name" />
+            <br />
+
+            <label asp-for="Input.DeviceId" for="txt_inputDeviceId"></label>
+            <input asp-for="Input.DeviceId" id="txt_inputDeviceId" type="text" class="form-control" placeholder="Room's Device Id" />
+            <small class="form-text text-muted">Leave blank if room does not have a device</small>
+            <br />
+        </div>
+
+        <a href="/Location/Details/@Model.TargetLocationId" class="btn btn-outline-danger btn-default">Cancel</a>
+        <button id="btn_submit" class="noClick btn btn-outline-info">Upload</button>
+    </form>
+</div>
+
+<script>
+    $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
+        $(this).remove();
+        $("#pageContent").fadeIn(@Model.ContentFade);
+    });
+</script>

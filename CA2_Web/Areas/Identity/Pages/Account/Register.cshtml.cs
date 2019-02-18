@@ -1,5 +1,5 @@
-﻿using CA2_Assignment.Models;
-using CA2_Assignment.Services;
+﻿using CA2_Web.Models;
+using CA2_Web.Services;
 using CA2_Web.Data;
 using CA2_Web.Models;
 using Microsoft.AspNetCore.Authorization;

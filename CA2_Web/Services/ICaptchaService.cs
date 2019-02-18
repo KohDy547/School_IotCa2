@@ -1,4 +1,4 @@
-﻿using CA2_Assignment.Models;
+﻿using CA2_Web.Models;
 using CA2_Web.Configurations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -8,7 +8,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
-namespace CA2_Assignment.Services
+namespace CA2_Web.Services
 {
     public interface ICaptchaService
     {

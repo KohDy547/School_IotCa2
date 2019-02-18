@@ -2,37 +2,40 @@
 @using CA2_Web.Models
 @model CA2_Web.Pages.Location.DetailsModel
 @{
-    ViewData["Title"] = Model.Location.Name;
-    string locationImgUrl = Model.ImgBaseUrl + Model.Location.Id + ".jpg";
+    ViewData["Title"] = Model.CurrentLocationName;
+    string locationImgUrl = Model.ImgBaseUrl + Model.CurrentLocationId + ".jpg";
 }
 
 <div class="container-fluid row">
     <div class="col-md-6">
-        <h2 class="mt-0">@Model.Location.Name</h2>
+        <h2 class="mt-0">@Model.CurrentLocationName</h2>
     </div>
     <div class="col-md-6 text-right">
-        @if (Model.IsAdmin)
+        @if (Model.CurrentUserAl >= 5)
         {
+            <a class="btn btn-outline-info" href="~/Room/Add/@Model.CurrentLocationId">Add Room</a>
             <button type="button" class="btn btn-outline-danger" onclick="btn_Delete_OnClick();">Delete</button>
         }
     </div>
 </div>
 <hr />
-@if (Model.IsAdmin)
+@if (Model.CurrentUserAl >= 5)
 {
     <div id="confirmDelete" style="display:none;" class="alert alert-danger alert-dismissible" role="alert">
         <form method="post">
-            <input type="text" style="display:none;" value="deleteLocation" name="postType" />
-            <input type="text" style="display:none;" value="@Model.Location.Id" name="targetLocationId" />
+            <input type="text" style="display:none;" value="DeleteLocation" name="_PostType" />
+            <input type="text" style="display:none;" value="@Model.CurrentLocationId" name="_CurrentLocationId" />
             <button type="submit" class="btn btn-sm btn-outline-danger" style="margin:0px 3px 0px 3px;">I said delete!</button>
             <button type="button" onclick="btn_HangOn_OnClick();" class="btn btn-sm btn-outline-secondary" style="margin:0px 3px 0px 3px;">Hang on...</button>
             <strong>Delete this location?</strong> Are you sure??
         </form>
     </div>
 }
+
 <div id="pageLoader" class="container d-flex justify-content-center">
     <img src="~/images/Loader.gif" />
 </div>
+
 <div id="pageContent" class="container" style="display:none; min-width:560px;">
     @if (Model.ShowMessage)
     {
@@ -53,17 +56,23 @@
     <div class="row">
         @foreach (Room room in Model.Rooms)
         {
+            string enabled = (string.IsNullOrEmpty(room.DeviceId)) ? "disabled" : "";
+            string status =
+                (string.IsNullOrEmpty(room.DeviceId)) ? "btn-outline-secondary" :
+                (Model.RoomsOnLockdown.Contains(room.Id)) ? "btn-danger" :
+                "btn-outline-danger";
             <div class="card" style="display:none; width:100%; margin:10px 0px 10px 0px;" id="@room.Id">
                 <div class="card-body">
                     <h5 class="card-title float-left">@room.Name</h5>
                     <div class="card-text">
-                        @if (Model.IsAdmin)
+                        @if (Model.CurrentUserAl >= 5)
                         {
                             <form method="post">
-                                <input type="text" style="display:none;" name="txt_deviceId" value="@room.DeviceId" />
-                                <input type="text" style="display:none;" name="txt_roomId" value="@room.Id" />
-                                <input type="text" style="display:none;" value="triggerLockdown" name="postType" />
-                                <button type="submit" class="btn btn-outline-danger float-right">Lockdown</button>
+                                <input type="text" style="display:none;" value="TriggerLockdown" name="_PostType" />
+                                <input type="text" style="display:none;" value="@Model.CurrentLocationId" name="_CurrentLocationId" />
+                                <input type="text" style="display:none;" value="@room.DeviceId" name="txt_deviceId" />
+                                <input type="text" style="display:none;" value="@room.Id" name="txt_roomId" />
+                                <button type="submit" @enabled class="btn @status float-right">Lockdown</button>
                             </form>
                         }
                         <a style="margin:0px 10px 0px 10px;" href="../../Room/Index/@room.Id" class="btn btn-outline-info float-right">
@@ -82,8 +91,9 @@
             Model.ContentFade += 10;
         }
     </div>
+</div>
 
-    <script>
+<script>
     $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
         $(this).remove();
         $("#pageContent").fadeIn(@Model.ContentFade);
@@ -95,5 +105,4 @@
     function btn_HangOn_OnClick() {
         $("#confirmDelete").fadeOut(@Model.ContentFade);
     }
-    </script>
-</div>
+</script>

@@ -22,25 +22,23 @@
         Model.Message = "";
     }
 
-    <form id="uploadTalent" method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data">
         <div class="form-group">
-            <input name="txt_isStudent" style="display:none" type="text" value="@Model.IsStudent" />
-            <input name="txt_userName" style="display:none" type="text" value="@Model.UserName" />
-            <input name="txt_roomId" style="display:none" type="text" value="@Model.RoomId" />
+            <input name="_CurrentRoomId" style="display:none" type="text" value="@Model.CurrentRoomId" />
 
-            <label for="txt_roomName">Room</label>
-            <input name="txt_roomName" id="txt_roomName" disabled type="text" class="form-control"
-                   placeholder="Room Name" value="@Model.RoomName" />
+            <label for="txt_inputRoomName">Room</label>
+            <input name="txt_inputRoomName" id="txt_roomName" disabled type="text" class="form-control"
+                   placeholder="Room Name" value="@Model.CurrentRoomName" />
             <br />
 
-            <label for="dt_date">Date</label>
-            <input name="dt_date" id="dt_date" type="date" class="form-control" />
+            <label for="dt_inputDate">Date</label>
+            <input name="dt_inputDate" id="dt_inputDate" type="date" class="form-control" />
             <br />
 
-            @if (Model.IsStudent == 1)
+            @if (Model.CurrentUserAl == 1)
             {
-                <label for="cmb_Authority">Supervised By</label>
-                <select class="form-control" name="cmb_Authority" id="cmb_Authority">
+                <label for="cmb_inputAuthority">Supervised By</label>
+                <select class="form-control" name="cmb_inputAuthority" id="cmb_inputAuthority">
                     @foreach (string[] authority in Model.Authorities)
                     {
                         <option value="@authority[0]">@authority[1]</option>
@@ -49,8 +47,8 @@
                 <br />
             }
 
-            <label for="cmb_timeSlot">Time Slot</label>
-            <select class="form-control" name="cmb_timeSlot" id="cmb_timeSlot">
+            <label for="cmb_inputTimeSlot">Time Slot</label>
+            <select class="form-control" name="cmb_inputTimeSlot" id="cmb_inputTimeSlot">
                 @for (int i = 0; i < Model.TimeSlots.Length; i++)
                 {
                     <option value="@i">@Model.TimeSlots[i]</option>
@@ -58,10 +56,11 @@
             </select>
         </div>
 
-        <a href="/Room/Index/@Model.RoomId" class="btn btn-outline-danger btn-default">Cancel</a>
+        <a href="/Room/Index/@Model.CurrentRoomId" class="btn btn-outline-danger btn-default">Cancel</a>
         <button id="btn_submit" class="noClick btn btn-outline-info">Upload</button>
     </form>
 </div>
+
 <script>
     $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
         $(this).remove();

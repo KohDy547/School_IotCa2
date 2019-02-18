@@ -22,41 +22,50 @@ namespace CA2_Web.Pages.Location
 
         public int LoaderFade = 800;
         public int ContentFade = 500;
-        public bool IsAdmin = false;
+
+        public string CurrentUserId = "";
+        public string CurrentUserName = "";
+        public int CurrentUserAl = 0;
+
         public string ImgBaseUrl { get; set; }
         public Models.Location[] Locations = new Models.Location[0];
 
-        private readonly ApplicationDbContext _ApplicationDbContext;
-        private readonly AwsS3Configurations _AwsS3Configurations;
         private readonly IHttpContextAccessor _IHttpContextAccessor;
+        private readonly ApplicationDbContext _ApplicationDbContext;
+        private readonly IoTConfigurations _IoTConfigurations;
         public IndexModel(
+            IHttpContextAccessor IHttpContextAccessor,
             ApplicationDbContext ApplicationDbContext,
-            IOptions<AwsS3Configurations> AwsS3Configurations,
-            IHttpContextAccessor IHttpContextAccessor)
+            IOptions<IoTConfigurations> IoTConfigurations)
         {
-            _ApplicationDbContext = ApplicationDbContext;
-            _AwsS3Configurations = AwsS3Configurations.Value;
             _IHttpContextAccessor = IHttpContextAccessor;
+            _ApplicationDbContext = ApplicationDbContext;
+            _IoTConfigurations = IoTConfigurations.Value;
 
-            ImgBaseUrl =_AwsS3Configurations.Locations_ImgBaseUrl;
+            ImgBaseUrl = _IoTConfigurations.AwsS3_LocationsImgBaseUrl;
         }
 
         public void OnGet()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                string[] currentUserInfo =
+                    _ApplicationDbContext.UserProperties
+                    .Where(
+                        x => x.Id == _IHttpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)
+                    .Select(x => new string[] {
+                        x.Id,
+                        x.Email,
+                        x.AccessLevel.ToString()
+                    })
+                    .First();
+
+                CurrentUserId = currentUserInfo[0];
+                CurrentUserName = currentUserInfo[1];
+                CurrentUserAl = Int32.Parse(currentUserInfo[2]);
+            }
             try
             {
-                if (User.Identity.IsAuthenticated)
-                {
-                    string currentUserId = 
-                        _IHttpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-                    int currentUserAl = 
-                        _ApplicationDbContext.UserProperties
-                        .Where(x => x.Id == currentUserId)
-                        .Select(x => x.AccessLevel)
-                        .First();
-                    IsAdmin = currentUserAl >= 5;
-                }
-
                 if (Searching)
                 {
                     string query = SearchedQuery;
@@ -64,9 +73,9 @@ namespace CA2_Web.Pages.Location
                     try
                     {
                         Locations = _ApplicationDbContext.Locations.Where(x =>
-                        x.Name.ToLower().Contains(queryLower) ||
-                        x.Description.ToLower().Contains(queryLower))
-                        .ToArray();
+                            x.Name.ToLower().Contains(queryLower) ||
+                            x.Description.ToLower().Contains(queryLower))
+                            .ToArray();
                         if (Locations.Length == 0) Message = "alert alert-warning|'" + query + "' returned no result.";
                         else Message = "alert alert-success|'" + query + "' returned " + Locations.Length + " result" +
                             ((Locations.Length > 1) ? "s." : ".");
@@ -89,7 +98,7 @@ namespace CA2_Web.Pages.Location
         }
         public IActionResult OnPost()
         {
-            string inputQuery = Request.Form["txt_searchLocation"];
+            string inputQuery = Request.Form["txt_inputSearchLocation"];
             SearchedQuery = inputQuery;
             return RedirectToPage("Index");
         }

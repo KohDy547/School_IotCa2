@@ -3,13 +3,13 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.S3;
 using Amazon.S3.Model;
-using CA2_Assignment.Models;
+using CA2_Web.Models;
 using System;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace CA2_Assignment.Services
+namespace CA2_Web.Services
 {
     public interface IAwsService
     {

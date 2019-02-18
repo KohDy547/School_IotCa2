@@ -1,12 +1,6 @@
-﻿using Amazon;
-using Amazon.Runtime;
-using Amazon.S3;
-using CA2_Web.Models;
-using CA2_Web.Services;
-using CA2_Web.Configurations;
+﻿using CA2_Web.Configurations;
 using CA2_Web.Data;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -14,11 +8,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 
-namespace CA2_Web.Pages.Location
+namespace CA2_Web.Pages.Room
 {
     [Authorize(Policy = "AccessLevel02")]
     public class AddModel : PageModel
@@ -29,10 +22,26 @@ namespace CA2_Web.Pages.Location
 
         public int LoaderFade = 800;
         public int ContentFade = 500;
-        
+
         public string CurrentUserId = "";
         public string CurrentUserName = "";
         public int CurrentUserAl = 0;
+
+        public string TargetLocationId = "";
+        public string TargetLocationName = "";
+
+        private readonly IHttpContextAccessor _IHttpContextAccessor;
+        private readonly ApplicationDbContext _ApplicationDbContext;
+        private readonly AppConfigurations _AppConfigurations;
+        public AddModel(
+            IHttpContextAccessor IHttpContextAccessor,
+            ApplicationDbContext ApplicationDbContext,
+            IOptions<AppConfigurations> AppConfigurations)
+        {
+            _IHttpContextAccessor = IHttpContextAccessor;
+            _ApplicationDbContext = ApplicationDbContext;
+            _AppConfigurations = AppConfigurations.Value;
+        }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -41,44 +50,11 @@ namespace CA2_Web.Pages.Location
             [Required(ErrorMessage = "Name"), Display(Name = "Name")]
             public string Name { get; set; }
 
-            [Required(ErrorMessage = "Description"), Display(Name = "Description")]
-            public string Description { get; set; }
-
-            [Required(ErrorMessage = "Photo"), Display(Name = "Photo")]
-            public IFormFile Photo { get; set; }
+            [Display(Name = "Device Id")]
+            public string DeviceId { get; set; }
         }
 
-        private readonly IHostingEnvironment _IHostingEnvironment;
-        private readonly IHttpContextAccessor _IHttpContextAccessor;
-        private readonly ApplicationDbContext _ApplicationDbContext;
-        private readonly AwsConfigurations _AwsConfigurations;
-        private readonly AwsS3Configurations _AwsS3Configurations;
-        private readonly AmazonS3Client _AmazonS3Client;
-        private readonly IAwsService _IAwsService;
-        public AddModel(
-            IHostingEnvironment IHostingEnvironment,
-            IHttpContextAccessor IHttpContextAccessor,
-            ApplicationDbContext ApplicationDbContext,
-            IOptions<AwsConfigurations> AwsConfigurations,
-            IOptions<AwsS3Configurations> AwsS3Configurations,
-            IAwsService IAwsService)
-        {
-            _IHostingEnvironment = IHostingEnvironment;
-            _IHttpContextAccessor = IHttpContextAccessor;
-            _ApplicationDbContext = ApplicationDbContext;
-            _AwsConfigurations = AwsConfigurations.Value;
-            _AwsS3Configurations = AwsS3Configurations.Value;
-            _IAwsService = IAwsService;
-
-            string awsCredentialsPath = _IHostingEnvironment.ContentRootPath + _AwsConfigurations.CredentialsPath;
-            _AmazonS3Client = new AmazonS3Client(
-                new StoredProfileAWSCredentials(
-                    _AwsS3Configurations.CredentialsProfile,
-                    awsCredentialsPath),
-                RegionEndpoint.GetBySystemName(_AwsS3Configurations.BucketRegion));
-        }
-
-        public void OnGet()
+        public void OnGet(string targetId)
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -97,6 +73,12 @@ namespace CA2_Web.Pages.Location
                 CurrentUserName = currentUserInfo[1];
                 CurrentUserAl = Int32.Parse(currentUserInfo[2]);
             }
+            
+            TargetLocationId = targetId;
+            TargetLocationName = _ApplicationDbContext.Locations
+                .Where(x => x.Id == TargetLocationId)
+                .Select(x => x.Name)
+                .First();
         }
         public IActionResult OnPost()
         {
@@ -113,6 +95,9 @@ namespace CA2_Web.Pages.Location
                 Message = returnMessage.Remove(returnMessage.Length - 2) + ".";
                 return RedirectToPage("Add");
             }
+
+            TargetLocationId = Request.Form["txt_inputLocationId"];
+            TargetLocationName = Request.Form["txt_inputLocationName"];
 
             if (User.Identity.IsAuthenticated)
             {
@@ -133,40 +118,24 @@ namespace CA2_Web.Pages.Location
             }
             try
             {
-                Response returnedResponse;
                 string generatedId = Guid.NewGuid().ToString();
-
-                IFormFile photo = Input.Photo;
-                using (Stream stream = photo.OpenReadStream())
-                {
-                    returnedResponse = _IAwsService.awsS3_UploadStreamAsync(
-                        _AmazonS3Client,
-                        _AwsS3Configurations.BucketName,
-                        "Ca2Iot/" + generatedId + ".jpg",
-                        stream,
-                        true).Result;
-                }
-                if (returnedResponse.HasError)
-                {
-                    Message = "alert alert-danger|Failed to add location.";
-                    return RedirectToPage("Add");
-                }
-
-                Models.Location newLocation = new Models.Location
+                Models.Room newRoom = new Models.Room
                 {
                     Id = generatedId,
                     Name = Input.Name,
-                    Description = Input.Description
+                    DeviceId = Input.DeviceId,
+                    LocationId = TargetLocationId,
+                    LocationName = TargetLocationName
                 };
-                _ApplicationDbContext.Locations.Add(newLocation);
+                _ApplicationDbContext.Rooms.Add(newRoom);
                 _ApplicationDbContext.SaveChangesAsync();
 
-                Message = "alert alert-success|Location added successfully.";
-                return RedirectToPage("Index");
+                Message ="alert alert-success|Room added successfully.";
+                return Redirect("~/Location/Details/" + TargetLocationId);
             }
             catch
             {
-                Message = "alert alert-danger|Failed to add location.";
+                Message = "alert alert-danger|Failed to add room.";
                 return RedirectToPage("Add");
             }
         }

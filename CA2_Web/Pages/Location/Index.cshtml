@@ -6,8 +6,8 @@
 }
 
 <style>
-    .locationImg{
-        width:200px;
+    .locationImg {
+        width: 200px;
     }
 </style>
 
@@ -16,27 +16,31 @@
         <h2 class="mt-0">Locations</h2>
     </div>
     <div class="col-md-6 text-right">
-        @if (Model.IsAdmin)
+        @if (Model.CurrentUserAl >= 5)
         {
             <a class="btn btn-outline-info" asp-page="/Location/Add">Add Location</a>
         }
     </div>
 </div>
 <hr />
+
 <div id="pageLoader" class="container d-flex justify-content-center">
     <img src="~/images/Loader.gif" />
 </div>
+
 <div id="pageContent" class="container" style="display:none; min-width:560px;">
     <form id="searchLocation" class="container" method="post">
         <div class="row">
             <div class="input-group">
                 @if (Model.Searching)
                 {
-                    <input id="txt_searchLocation" name="txt_searchLocation" type="text" class="form-control" placeholder="Search..." value="@Model.SearchedQuery">
+                    <input id="txt_inputSearchLocation" name="txt_inputSearchLocation" type="text"
+                        class="form-control" placeholder="Search..." value="@Model.SearchedQuery">
                 }
                 else
                 {
-                    <input id="txt_searchLocation" name="txt_searchLocation" type="text" class="form-control" placeholder="Search...">
+                    <input id="txt_inputSearchLocation" name="txt_inputSearchLocation" type="text" 
+                        class="form-control" placeholder="Search...">
                 }
                 <div class="input-group-append">
                     <a class="btn btn-outline-secondary" asp-page="/Location/Add">Clear</a>
@@ -72,11 +76,11 @@
             </div>
         </div>
     }
-
-    <script>
-        $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
-            $(this).remove();
-            $("#pageContent").fadeIn(@Model.ContentFade);
-        });
-    </script>
 </div>
+
+<script>
+    $("#pageLoader").fadeOut(@Model.LoaderFade, function () {
+        $(this).remove();
+        $("#pageContent").fadeIn(@Model.ContentFade);
+    });
+</script>

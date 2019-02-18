@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace CA2_Assignment.Models
+namespace CA2_Web.Models
 {
     public class Response
     {

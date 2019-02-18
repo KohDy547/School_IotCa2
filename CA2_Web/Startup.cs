@@ -1,4 +1,4 @@
-using CA2_Assignment.Services;
+using CA2_Web.Services;
 using CA2_Web.Configurations;
 using CA2_Web.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -80,6 +80,8 @@ namespace CA2_Web
             services.Configure<AwsConfigurations>(Configuration.GetSection("AwsConfigurations"));
             services.Configure<AwsS3Configurations>(Configuration.GetSection("AwsS3Configurations"));
             services.Configure<AwsDynamoConfigurations>(Configuration.GetSection("AwsDynamoConfigurations"));
+
+            services.Configure<IoTConfigurations>(Configuration.GetSection("IoTConfigurations"));
             #endregion
             #region ConfigureServices - Inject Dependencies
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

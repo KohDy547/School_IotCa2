@@ -4,6 +4,7 @@
     {
         public string AppName { get; set; }
         public string AppFooter { get; set; }
+
         public string AppDateTimeFormat { get; set; }
     }
 
@@ -33,13 +34,18 @@
         public string CredentialsProfile { get; set; }
         public string BucketRegion { get; set; }
         public string BucketName { get; set; }
-
-        public string Locations_ImgBaseUrl { get; set; }
-        public string Surveillance_ImgBaseUrl { get; set; }
     }
     public class AwsDynamoConfigurations
     {
         public string CredentialsProfile { get; set; }
         public string Region { get; set; }
+    }
+    public class IoTConfigurations
+    {
+        public string AwsS3_LocationsImgBaseUrl { get; set; }
+        public string AwsS3_SurveillanceImgBaseUrl { get; set; }
+
+        public string AwsDynamo_DeviceMessageTable { get; set; }
+        public string AwsDynamo_WebAppMessageTable { get; set; }
     }
 }

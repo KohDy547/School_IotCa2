@@ -1,0 +1,99 @@
+﻿@using Amazon;
+@using Amazon.DynamoDBv2;
+@using Amazon.DynamoDBv2.Model;
+@using Amazon.Runtime;
+@using Microsoft.Extensions.Options;
+@using CA2_Web.Configurations;
+@using CA2_Web.Models;
+@using CA2_Web.Services;
+@using Microsoft.AspNetCore.Hosting;
+@using System.Linq;
+@using System.Globalization;
+
+@inject IHostingEnvironment _IHostingEnvironment
+@inject IOptions<AppConfigurations> _AppConfigurations
+@inject IOptions<IoTConfigurations> _IoTConfigurations
+@inject IOptions<AwsConfigurations> _AwsConfigurations
+@inject IOptions<AwsDynamoConfigurations> _AwsDynamoConfigurations
+@inject IAwsService _IAwsService
+@{
+    string currentDeviceId = ViewData["CurrentDeviceId"].ToString();
+
+    AmazonDynamoDBClient _AmazonDynamoDBClient = new AmazonDynamoDBClient(
+        new StoredProfileAWSCredentials(
+            _AwsDynamoConfigurations.Value.CredentialsProfile,
+            _IHostingEnvironment.ContentRootPath + _AwsConfigurations.Value.CredentialsPath),
+        RegionEndpoint.GetBySystemName(_AwsDynamoConfigurations.Value.Region));
+
+    QueryRequest queryRequest = new QueryRequest
+    {
+        TableName = _IoTConfigurations.Value.AwsDynamo_DeviceMessageTable,
+        KeyConditionExpression = "deviceid = :deviceId",
+        ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
+{":deviceId", new AttributeValue { S = currentDeviceId }}}
+    };
+    Response response = _IAwsService.awsDDB_GetObjectAsync(
+        _AmazonDynamoDBClient, queryRequest).Result;
+    QueryResponse queryResponse = (QueryResponse)response.Payload;
+    string[][] dataRaw = queryResponse.Items.Select(
+        x => new string[] {
+            x["datetimeid"].S,
+            x["humidity"].N,
+            x["light"].N,
+            x["temperature"].N}
+        )
+    .ToArray();
+
+    string[][] data = dataRaw.OrderByDescending(
+        x => DateTime.ParseExact(
+            x[0],
+            _AppConfigurations.Value.AppDateTimeFormat,
+            CultureInfo.InvariantCulture)
+        )
+        .Take(20)
+        .ToArray();
+}
+
+<div class="card" style="padding:0px; margin:5px; width:100%;">
+    <h5 class="card-header">
+        Audited Data
+    </h5>
+    <div class="card-content">
+        <div class="card-body">
+            <div id="dataChart"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        graphdata = new google.visualization.DataTable();
+        graphdata.addColumn('string', 'Time');
+        graphdata.addColumn('number', 'Humidity');
+        graphdata.addColumn('number', 'Light');
+        graphdata.addColumn('number', 'Temperature');
+
+        graphdata.addRows([
+        @for (int i = 0; i < data.Length; i++)
+        {
+            string[] dataRow = data[i];
+            string deliminate = (i == data.Length - 1) ? "" : ",";
+            @:['@dataRow[0]', @dataRow[1], @dataRow[2], @dataRow[3]]@deliminate
+        }
+        ]);
+
+        var options = {
+            curveType: 'function',
+            height: 400,
+            legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('dataChart'));
+        chart.draw(graphdata, options);
+    }
+</script>

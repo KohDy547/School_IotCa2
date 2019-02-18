@@ -5,7 +5,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Threading.Tasks;
 
-namespace CA2_Assignment.Services
+namespace CA2_Web.Services
 {
     public class EmailService : IEmailSender
     {

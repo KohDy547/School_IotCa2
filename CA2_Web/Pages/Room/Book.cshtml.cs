@@ -1,17 +1,18 @@
 ﻿using CA2_Web.Configurations;
 using CA2_Web.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 
 namespace CA2_Web.Pages.Room
 {
+    [Authorize(Policy = "AccessLevel01")]
     public class BookModel : PageModel
     {
         [TempData]
@@ -20,10 +21,14 @@ namespace CA2_Web.Pages.Room
 
         public int LoaderFade = 800;
         public int ContentFade = 500;
-        public int IsStudent = 0;
-        public string RoomId = "";
-        public string RoomName = "";
-        public string UserName { get; set; }
+
+        public string CurrentUserId = "";
+        public string CurrentUserName = "";
+        public int CurrentUserAl = 0;
+
+        public string CurrentRoomId = "";
+        public string CurrentRoomName = "";
+
         public string[] TimeSlots = new string[]
         {
             "0800 - 1000",
@@ -49,55 +54,68 @@ namespace CA2_Web.Pages.Room
 
         public void OnGet(string targetId)
         {
-            RoomId = targetId;
+            if (User.Identity.IsAuthenticated)
+            {
+                string[] currentUserInfo =
+                    _ApplicationDbContext.UserProperties
+                    .Where(
+                        x => x.Id == _IHttpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)
+                    .Select(x => new string[] {
+                        x.Id,
+                        x.Email,
+                        x.AccessLevel.ToString()
+                    })
+                    .First();
+                
+                CurrentUserId = currentUserInfo[0];
+                CurrentUserName = currentUserInfo[1];
+                CurrentUserAl = Int32.Parse(currentUserInfo[2]);
+            }
 
-            string currentUserId =
-                _IHttpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            int currentUserAl =
-                _ApplicationDbContext.UserProperties
-                .Where(x => x.Id == currentUserId)
-                .Select(x => x.AccessLevel)
-                .First();
-            IsStudent = (currentUserAl == 1)? 1: 0;
+            CurrentRoomId = targetId;
+            CurrentRoomName = _ApplicationDbContext.Rooms.Where(x => x.Id == targetId).Select(x => x.Name).First();
 
-            UserName =
-                _ApplicationDbContext.UserProperties
-                .Where(x => x.Id == currentUserId)
-                .Select(x => x.Email)
-                .First();
-
-            RoomName = _ApplicationDbContext.Rooms.Where(x => x.Id == targetId).Select(x => x.Name).First();
-
-            if (IsStudent == 1)
+            if (CurrentUserAl == 1)
             {
                 Authorities = _ApplicationDbContext.UserProperties
-                    .Where(x => x.AccessLevel == 2)
+                    .Where(x => x.AccessLevel >= 2)
                     .Select(x => new string[] { x.Id, x.Email })
                     .ToArray();
             }
         }
         public IActionResult OnPost()
         {
-            string student = Request.Form["txt_isStudent"];
-            string roomId = Request.Form["txt_roomId"];
-            string userName = Request.Form["txt_userName"];
+            if (User.Identity.IsAuthenticated)
+            {
+                string[] currentUserInfo =
+                    _ApplicationDbContext.UserProperties
+                    .Where(
+                        x => x.Id == _IHttpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value)
+                    .Select(x => new string[] {
+                        x.Id,
+                        x.Email,
+                        x.AccessLevel.ToString()
+                    })
+                    .First();
 
-            string currentUserId =
-                _IHttpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                CurrentUserId = currentUserInfo[0];
+                CurrentUserName = currentUserInfo[1];
+                CurrentUserAl = Int32.Parse(currentUserInfo[2]);
+            }
+            CurrentRoomId = Request.Form["_CurrentRoomId"];
 
             try
             {
-                string authority = "";
-                if (student == "1")
+                if (CurrentUserAl == 1)
                 {
-                    int tsId = Int32.Parse(Request.Form["cmb_timeSlot"]);
-                    string rawDt = Request.Form["dt_date"];
-                    string datetime = DateTime.ParseExact(rawDt,
+                    int timeslotId = Int32.Parse(Request.Form["cmb_inputTimeSlot"]);
+                    string inputDatetime = Request.Form["dt_inputDate"];
+                    string formattedDatetime = DateTime.ParseExact(inputDatetime,
                         "yyyy-MM-dd",
                         CultureInfo.InvariantCulture)
                         .ToString(_AppConfigurations.AppDateTimeFormat);
 
-                    authority = Request.Form["cmb_Authority"];
+                    string authority = Request.Form["cmb_inputAuthority"];
                     string authorityName = _ApplicationDbContext
                         .UserProperties
                         .Where(x => x.Id == authority)
@@ -107,22 +125,22 @@ namespace CA2_Web.Pages.Room
                     _ApplicationDbContext.Bookings.Add(new Models.Booking
                     {
                         Id = Guid.NewGuid().ToString(),
-                        RoomId = roomId,
-                        BookedByName = userName,
-                        BookedById = currentUserId,
+                        RoomId = CurrentRoomId,
+                        BookedByName = CurrentUserName,
+                        BookedById = CurrentUserId,
                         Status = 0,
                         SupervisedByName = authorityName,
                         SupervisedById = authority,
-                        TimeSlot = TimeSlots[tsId],
-                        TimeSlotId = tsId,
-                        BookDate = datetime
+                        TimeSlot = TimeSlots[timeslotId],
+                        TimeSlotId = timeslotId,
+                        BookDate = formattedDatetime
                     });
                 }
                 else
                 {
-                    int tsId = Int32.Parse(Request.Form["cmb_timeSlot"]);
-                    string rawDt = Request.Form["dt_date"];
-                    string datetime = DateTime.ParseExact(rawDt,
+                    int timeslotId = Int32.Parse(Request.Form["cmb_inputTimeSlot"]);
+                    string inputDatetime = Request.Form["dt_inputDate"];
+                    string formattedDatetime = DateTime.ParseExact(inputDatetime,
                         "yyyy-MM-dd",
                         CultureInfo.InvariantCulture)
                         .ToString(_AppConfigurations.AppDateTimeFormat);
@@ -130,27 +148,27 @@ namespace CA2_Web.Pages.Room
                     _ApplicationDbContext.Bookings.Add(new Models.Booking
                     {
                         Id = Guid.NewGuid().ToString(),
-                        RoomId = roomId,
-                        BookedByName = userName,
-                        BookedById = currentUserId,
+                        RoomId = CurrentRoomId,
+                        BookedByName = CurrentUserName,
+                        BookedById = CurrentUserId,
                         Status = 1,
                         SupervisedByName = null,
                         SupervisedById = null,
-                        TimeSlot = TimeSlots[tsId],
-                        TimeSlotId = tsId,
-                        BookDate = datetime
+                        TimeSlot = TimeSlots[timeslotId],
+                        TimeSlotId = timeslotId,
+                        BookDate = formattedDatetime
                     });
                 }
 
                 _ApplicationDbContext.SaveChangesAsync();
 
                 Message = "alert alert-success|Booking successfully created.";
-                return Redirect("/Location/Index");
+                return Redirect("~/Room/Index/" + CurrentRoomId);
             }
-            catch (Exception e)
+            catch
             {
                 Message = "alert alert-danger|Failed to creating booking.";
-                return RedirectToPage("Book", roomId);
+                return RedirectToPage("Book", CurrentRoomId);
             }
         }
     }
