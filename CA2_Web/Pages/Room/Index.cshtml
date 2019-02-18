@@ -97,7 +97,10 @@
     Model.Message = "";
 }
 
-<partial name="_ChartView" />
+@if (!string.IsNullOrEmpty(Model.CurrentRoomDeviceId))
+{
+    <partial name="_ChartView" />
+}
 <hr />
 <div id="pageContent" class="container" style="display:none; min-width:560px;">
     @if (!string.IsNullOrEmpty(Model.CurrentRoomDeviceId))
